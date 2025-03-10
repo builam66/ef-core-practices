@@ -8,14 +8,17 @@ namespace EFCP.API.Endpoints
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapGet("/sample/old", async (ISender sender) =>
+            var getSampleGroup = app.MapGroup("/sample").WithTags("GetSample");
+
+            getSampleGroup.MapGet("/old", async (ISender sender) =>
             {
                 var result = await sender.Send(new GetOldQuery());
 
                 return Results.Ok(result);
             });
 
-            app.MapGet("/sample/new", async (ISender sender) =>
+
+            getSampleGroup.MapGet("/new", async (ISender sender) =>
             {
                 var result = await sender.Send(new GetNewQuery());
 
