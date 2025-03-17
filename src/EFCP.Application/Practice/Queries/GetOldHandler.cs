@@ -9,13 +9,13 @@ namespace EFCP.Application.Practice.Queries
 
     public record GetOldResult(long ExecutionTime);
 
-    public class GetOldQueryHandler(IAdventureWorks2022Context _dbContext) : IRequestHandler<GetOldQuery, GetOldResult>
+    public class GetOldQueryHandler(IImdbDbContext _dbContext) : IRequestHandler<GetOldQuery, GetOldResult>
     {
         public async Task<GetOldResult> Handle(GetOldQuery query, CancellationToken cancellationToken)
         {
             var stopwatch = Stopwatch.StartNew();
 
-            var sample = await _dbContext.Addresses.Include(a => a.BusinessEntityAddresses).ToListAsync(cancellationToken);
+            var sample = await _dbContext.Attributes.Include(a => a.TitleNames).ToListAsync(cancellationToken);
 
             stopwatch.Stop();
 

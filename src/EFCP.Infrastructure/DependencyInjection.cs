@@ -12,14 +12,14 @@ namespace EFCP.Infrastructure
         {
             var connectionString = configuration.GetConnectionString("Database");
 
-            services.AddDbContext<AdventureWorks2022Context>(options =>
+            services.AddDbContext<ImdbDbContext>(options =>
             {
                 options.UseSqlServer(connectionString, x => x
                     .UseNetTopologySuite()
                     .UseHierarchyId());
             });
 
-            services.AddScoped<IAdventureWorks2022Context, AdventureWorks2022Context>();
+            services.AddScoped<IImdbDbContext, ImdbDbContext>();
 
             return services;
         }
