@@ -15,6 +15,7 @@ namespace EFCP.Infrastructure
             services.AddDbContext<ImdbDbContext>(options =>
             {
                 options.UseSqlServer(connectionString, x => x
+                    .CommandTimeout(0)
                     .UseNetTopologySuite()
                     .UseHierarchyId());
             });
