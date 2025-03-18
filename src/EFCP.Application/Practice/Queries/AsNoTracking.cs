@@ -9,31 +9,31 @@ namespace EFCP.Application.Practice.Queries
 
     public record AsNoTrackingResult(long WithoutAsNoTracking, long WithAsNoTracking);
 
-    public class AsNoTrackingQueryHandler(IImdbDbContext _dbContext) 
+    public class AsNoTrackingQueryHandler(IImdbDbContext _dbContext)
         : IRequestHandler<AsNoTrackingQuery, AsNoTrackingResult>
     {
         public async Task<AsNoTrackingResult> Handle(AsNoTrackingQuery query, CancellationToken cancellationToken)
         {
             var stopwatch = Stopwatch.StartNew();
 
-            var sampleOld = await _dbContext.TitleNames
+            var newSample = await _dbContext.TitleNames
                     .Where(t => t.Region == null)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken);
 
             stopwatch.Stop();
-            var withAsNoTracking = stopwatch.ElapsedMilliseconds;
+            var newTime = stopwatch.ElapsedMilliseconds;
 
             stopwatch.Restart();
 
-            var sampleNew = await _dbContext.TitleNames
+            var oldSample = await _dbContext.TitleNames
                     .Where(t => t.Region == null)
                     .ToListAsync(cancellationToken);
 
             stopwatch.Stop();
-            var withoutAsNoTracking = stopwatch.ElapsedMilliseconds;
+            var oldTime = stopwatch.ElapsedMilliseconds;
 
-            return new AsNoTrackingResult(withoutAsNoTracking, withAsNoTracking);
+            return new AsNoTrackingResult(oldTime, newTime);
         }
     }
 }
