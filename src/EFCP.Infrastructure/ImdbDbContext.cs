@@ -283,4 +283,19 @@ public partial class ImdbDbContext : DbContext, IImdbDbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+    private static readonly Func<ImdbDbContext, string?, IAsyncEnumerable<TitleName>> _compiledQuery
+        = EF.CompileAsyncQuery((ImdbDbContext context, string? region) => context.TitleNames.Where(b => b.Region == region));
+
+    public async Task<int> SumOrdinalTitleNameByRegionAsync(string? region)
+    {
+        var ordinalSum = 0;
+
+        await foreach (var titleName in _compiledQuery(this, region))
+        {
+            ordinalSum += titleName.Ordinal;
+        }
+
+        return ordinalSum;
+    }
 }

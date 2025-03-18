@@ -27,5 +27,7 @@ namespace EFCP.Application.Abstractions
         DbSet<TitlePrincipal> TitlePrincipals { get; set; }
 
         DbSet<TitleType> TitleTypes { get; set; }
+
+        Task<int> SumOrdinalTitleNameByRegionAsync(string? region);
     }
 }
