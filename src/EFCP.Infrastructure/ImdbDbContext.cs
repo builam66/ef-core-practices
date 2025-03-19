@@ -1,6 +1,10 @@
 ﻿using EFCP.Application.Abstractions;
 using EFCP.Domain.Models;
+using EFCP.Infrastructure.Common;
+using EFCP.Infrastructure.Extensions;
+using EFCP.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Attribute = EFCP.Domain.Models.Attribute;
 
 namespace EFCP.Infrastructure;
@@ -37,6 +41,8 @@ public partial class ImdbDbContext : DbContext, IImdbDbContext
     public virtual DbSet<TitlePrincipal> TitlePrincipals { get; set; }
 
     public virtual DbSet<TitleType> TitleTypes { get; set; }
+
+    public IQueryable<int> TempTable => Set<TempTable>().Select(t => t.Id);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -279,6 +285,9 @@ public partial class ImdbDbContext : DbContext, IImdbDbContext
                 .HasColumnName("titleType");
         });
 
+        modelBuilder.Entity<TempTable>()
+            .ToView($"#{nameof(Models.TempTable)}");
+
         OnModelCreatingPartial(modelBuilder);
     }
 
@@ -297,5 +306,53 @@ public partial class ImdbDbContext : DbContext, IImdbDbContext
         }
 
         return ordinalSum;
+    }
+
+    public List<TEntity> QueryLargeIds<TEntity>(List<int> whereIds, Func<bool, List<TEntity>> func)
+    {
+        var result = new List<TEntity>();
+
+        if (whereIds.IsNullOrEmpty())
+            return result;
+
+        bool useTempTable = false;
+
+        if (whereIds.Count >= DatabaseConstants.MIN_IDS_FOR_TEMP_TABLE)
+        {
+            this.CreateTempTable($"#{nameof(Models.TempTable)}", whereIds);
+            useTempTable = true;
+            result = func.Invoke(useTempTable);
+            this.DeleteTempTable($"#{nameof(Models.TempTable)}");
+        }
+        else
+        {
+            result = func.Invoke(useTempTable);
+        }
+
+        return result;
+    }
+
+    public async Task<List<TEntity>> QueryLargeIdsAsync<TEntity>(List<int> whereIds, Func<bool, Task<List<TEntity>>> func)
+    {
+        var result = new List<TEntity>();
+
+        if (whereIds.IsNullOrEmpty())
+            return result;
+
+        bool useTempTable = false;
+
+        if (whereIds.Count >= DatabaseConstants.MIN_IDS_FOR_TEMP_TABLE)
+        {
+            await this.CreateTempTableAsync($"#{nameof(Models.TempTable)}", whereIds);
+            useTempTable = true;
+            result = await func.Invoke(useTempTable);
+            await this.DeleteTempTableAsync($"#{nameof(Models.TempTable)}");
+        }
+        else
+        {
+            result = await func.Invoke(useTempTable);
+        }
+
+        return result;
     }
 }

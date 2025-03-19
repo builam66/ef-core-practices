@@ -28,6 +28,12 @@ namespace EFCP.Application.Abstractions
 
         DbSet<TitleType> TitleTypes { get; set; }
 
+        IQueryable<int> TempTable { get; }
+
         Task<int> SumOrdinalTitleNameByRegionAsync(string? region);
+
+        List<TEntity> QueryLargeIds<TEntity>(List<int> whereIds, Func<bool, List<TEntity>> func);
+
+        Task<List<TEntity>> QueryLargeIdsAsync<TEntity>(List<int> whereIds, Func<bool, Task<List<TEntity>>> func);
     }
 }
