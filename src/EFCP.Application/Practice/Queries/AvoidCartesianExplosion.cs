@@ -22,6 +22,7 @@ namespace EFCP.Application.Practice.Queries
                         .Include(t => t.Attributes.Where(a => a.Attribute1.Contains("3-D")))
                         .Where(t => t.Region == null)
                         .AsSplitQuery()
+                        .AsNoTracking()
                         .ToListAsync(cancellationToken);
 
                 stopwatch.Stop();
@@ -32,6 +33,7 @@ namespace EFCP.Application.Practice.Queries
                 var oldSample = await _dbContext.TitleNames
                         .Include(t => t.Attributes)
                         .Where(t => t.Region == null)
+                        .AsNoTracking()
                         .ToListAsync(cancellationToken);
 
                 stopwatch.Stop();
